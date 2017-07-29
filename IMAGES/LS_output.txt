@@ -1,29 +1,29 @@
 lsuvfs output for disk3.img
 
-     159 2017-Jul-16 19:58:56 alphabet_short.txt
-      93 2017-Jul-16 19:58:56 digits_short.txt
+     159 2017-Jul-20 13:20:08 alphabet_short.txt
+      93 2017-Jul-20 13:20:08 digits_short.txt
 
 ===================================================================
 
 lsuvfs output for disk4.img
 
-     159 2017-Jul-16 20:02:19 alphabet_short.txt
-    6784 2017-Jul-16 20:02:19 alphabet.txt
-      93 2017-Jul-16 20:02:19 digits_short.txt
-   18228 2017-Jul-16 20:02:19 digits.txt
+     159 2017-Jul-20 13:22:48 alphabet_short.txt
+    6784 2017-Jul-20 13:22:48 alphabet.txt
+      93 2017-Jul-20 13:22:48 digits_short.txt
+   18228 2017-Jul-20 13:22:48 digits.txt
 
 ===================================================================
 
 lsuvfs output for disk5.img
 
-     700 2017-Jul-16 20:49:31 sonnet116.txt
-   72639 2017-Jul-16 20:49:31 graphic01.jpg
-    1079 2017-Jul-16 20:49:31 donne.txt
-   54960 2017-Jul-16 20:49:31 graphic02.jpg
-     738 2017-Jul-16 20:49:31 sonnet023.txt
-  103468 2017-Jul-16 20:49:31 macbeth.txt
-   67003 2017-Jul-16 20:49:31 graphic04.jpg
-  123619 2017-Jul-16 20:49:31 loves_labours_lost.txt
-   61707 2017-Jul-16 20:49:31 graphic03.jpg
-  314159 2017-Jul-16 20:49:32 random01.bin
-     741 2017-Jul-16 20:49:32 sonnet018.txt
+     700 2017-Jul-20 13:22:53 sonnet116.txt
+   72639 2017-Jul-20 13:22:53 graphic01.jpg
+    1079 2017-Jul-20 13:22:53 donne.txt
+   54960 2017-Jul-20 13:22:53 graphic02.jpg
+     738 2017-Jul-20 13:22:53 sonnet023.txt
+  103468 2017-Jul-20 13:22:53 macbeth.txt
+   67003 2017-Jul-20 13:22:53 graphic04.jpg
+  123619 2017-Jul-20 13:22:53 loves_labours_lost.txt
+   61707 2017-Jul-20 13:22:53 graphic03.jpg
+  314159 2017-Jul-20 13:22:53 random01.bin
+     741 2017-Jul-20 13:22:53 sonnet018.txt
