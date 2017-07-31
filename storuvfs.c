@@ -29,9 +29,7 @@ void                convertToNetDE(directory_entry_t * de);
 void                convertToHostDE(directory_entry_t * de);
 unsigned int        findFileOnDisk(diskimage_t * image, char * filename);
 unsigned long int   read_fat_entry(diskimage_t * image, unsigned long int entry);
-directory_entry_t   create_directory_entry(diskimage_t * image, char * filename);
 void                write_file_to_image(diskimage_t * image, char * filename, FILE * src_file);
-void                write_to_fat(diskimage_t * image, unsigned long int cur_entry, unsigned long int next_entry);
 void                read_fat(diskimage_t * image, int * FAT);
 void                write_fat(diskimage_t * t, int * FAT);
 
@@ -105,6 +103,10 @@ void sread(void * buffer, size_t sizeofelements, size_t num, FILE *f)
     }
 }
 
+/*
+ * Safe write
+ * Runs fwrite with input params and handles error
+ */
 void swrite(void * buffer, size_t sizeofelements, size_t num, FILE *f)
 {
     if ( fwrite(buffer, sizeofelements, num, f) != num )
@@ -165,17 +167,12 @@ unsigned int findFileOnDisk(diskimage_t * image, char * filename)
 }
 
 /*
- * Creates a directory entry for the file and returns the first block
+ * Writes src file to the specified image under filename
  */
-// directory_entry_t create_directory_entry(diskimage_t * image, char * filename)
-// {
-//     directory_entry_t de;
-//     de.status = DIR_ENTRY_NORMALFILE;
-//     de.start_block = next_free_block;
-// }
-
 void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
 {
+
+    // find where to write de
     unsigned long int de_write_byte = 0;
     int i, j;
     // for each block of root
@@ -198,10 +195,9 @@ void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
             break;
     }
 
+    // read in FAT
     int FAT[image->sb->fat_blocks * image->sb->block_size / SIZE_FAT_ENTRY];
     read_fat(image, FAT);
-
-    printf("DE start: %lu\n", de_write_byte);
 
     if(de_write_byte == 0)
     {
@@ -209,47 +205,42 @@ void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
         exit(1);
     }
 
+    // for reading and writing file
     char write_buffer[image->sb->block_size + 1];
+
+    // begin prepping de
     directory_entry_t de;
-
     de.status = DIR_ENTRY_NORMALFILE;
-
-    int k = image->sb->fat_start;
     sseek(image->f, image->sb->fat_start * image->sb->block_size, SEEK_SET);
     de.start_block = next_free_block(FAT, image->sb->num_blocks);
-    printf("%d\n", de.start_block);
-    de.num_blocks = 1;
+
+    // strncpy(&de._padding, "0xff0xff0xff0xff0xff0xff", 6);
+
+    de.num_blocks = 0;
     strcpy(de.filename, filename);
 
-    sseek(src_file, 0L, SEEK_SET);
     int bytes_read;
-
-    //read first block
-    bytes_read = fread(&write_buffer, 1, image->sb->block_size, src_file);
-    write_buffer[bytes_read] = '\0';
-
-    //write first block
-    sseek(image->f, de.start_block * image->sb->block_size, SEEK_SET);
-    swrite(&write_buffer, sizeof(char), bytes_read, image->f);
-
     unsigned int write_block = de.start_block;
+    unsigned int next_block;
+
+    sseek(src_file, 0L, SEEK_SET);
 
     while( (bytes_read = fread(&write_buffer, 1, image->sb->block_size, src_file)) > 0)
     {
-        int tmp = image->sb->fat_start * image->sb->block_size;
-        unsigned int next_block = next_free_block(FAT, image->sb->num_blocks);
-        
         write_buffer[bytes_read] = '\0';
+
+        FAT[write_block] = ntohl(FAT_RESERVED);
+        next_block = next_free_block(FAT, image->sb->num_blocks);
+        FAT[write_block] = ntohl(next_block);
+        
         if(next_block == 0)
         {
             fprintf(stderr, "Not enough room for file.\n");
             exit(1);
         }
 
-        //write_to_fat(image, write_block, next_block);
-
-        FAT[write_block] = ntohl(next_block);
-        printf("Saving %x to %x\n", next_block, write_block);
+        //printf("%s", write_buffer);
+        //printf("Saving %x to %x\n", next_block, write_block);
         
         sseek(image->f, write_block * image->sb->block_size, SEEK_SET);
         swrite(&write_buffer, sizeof(char), bytes_read, image->f);
@@ -257,9 +248,12 @@ void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
         write_block = next_block;
         de.num_blocks++;
     }
+
+    // end file and write FAT back to disk
     FAT[write_block] = FAT_LASTBLOCK;
     write_fat(image, FAT);
-    //write_to_fat(image, write_block, FAT_LASTBLOCK);
+
+    // finish up and write de
     de.file_size = (de.num_blocks - 1) * image->sb->block_size + bytes_read;
     pack_current_datetime(de.create_time);
     pack_current_datetime(de.modify_time);
@@ -267,14 +261,6 @@ void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
     sseek(image->f, de_write_byte, SEEK_SET);
     convertToHostDE(&de);
     swrite(&de, sizeof(de), 1, image->f);
-}
-
-void write_to_fat(diskimage_t * image, unsigned long int cur_entry, unsigned long int next_entry)
-{
-    sseek(image->f, image->sb->fat_start * image->sb->block_size + cur_entry * SIZE_FAT_ENTRY, SEEK_SET);
-    next_entry = ntohl(next_entry);
-    printf("Writing %lx to %lx\n", next_entry, cur_entry);
-    swrite(&next_entry, sizeof(unsigned long int), 1, image->f);
 }
 
 void convertToHostDE(directory_entry_t * de)
