@@ -132,10 +132,11 @@ unsigned int findFileOnDisk(diskimage_t * image, char * filename)
  */
 void catFile(diskimage_t * image, unsigned int start_block)
 {
-    char block_data[image->sb->block_size];
+    char block_data[image->sb->block_size + 1];
 
     sseek(image->f, start_block * image->sb->block_size, SEEK_SET);
     sread(&block_data, sizeof(char), image->sb->block_size, image->f);
+    block_data[image->sb->block_size] = '\0';
 
     printf("%s", block_data);
 
@@ -146,6 +147,7 @@ void catFile(diskimage_t * image, unsigned int start_block)
 
         sseek(image->f, block * image->sb->block_size, SEEK_SET);
         sread(&block_data, sizeof(char), image->sb->block_size, image->f);
+        block_data[image->sb->block_size] = '\0';
         printf("%s", block_data);
         //NextBlockStart = FatStart + CurrentBlockStart * 4 (each FAT entry is 4 bytes)
         block = read_fat_entry(image, block);
