@@ -132,7 +132,7 @@ unsigned int findFileOnDisk(diskimage_t * image, char * filename)
  */
 void catFile(diskimage_t * image, unsigned int start_block)
 {
-    char block_data[image->sb->block_size + 1];
+    unsigned char block_data[image->sb->block_size + 1];
 
     sseek(image->f, start_block * image->sb->block_size, SEEK_SET);
     sread(&block_data, sizeof(char), image->sb->block_size, image->f);

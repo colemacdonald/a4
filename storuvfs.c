@@ -206,7 +206,7 @@ void write_file_to_image(diskimage_t * image, char * filename, FILE * src_file)
     }
 
     // for reading and writing file
-    char write_buffer[image->sb->block_size + 1];
+    unsigned char write_buffer[image->sb->block_size + 1];
 
     // begin prepping de
     directory_entry_t de;
